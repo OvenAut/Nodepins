@@ -18,26 +18,35 @@ app.listen(4000);
 
 var socket = io.listen(app, {flashPolicyServer: false});
 
+var objSize = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
 
-
-
+function clientsN(obj) {
+	return objSize(obj.clients)
+} 
 
 socket.on('connection',function(client) {
 	
-	var objSize = function(obj) {
-	    var size = 0, key;
-	    for (key in obj) {
-	        if (obj.hasOwnProperty(key)) size++;
-	    }
-	    return size;
-	};
+	var message = JSON.stringify({clients: clientsN(this), sessionId: client.sessionId});
+	var self = this;
+	socket.broadcast(message);
 	
-
-
-
-	client.send("Clients:" + client.connections);
-	console.log(objSize(this.clients));
+	
+	
+	
+	client.on('disconnect',function() {
+			var message = JSON.stringify({clients: (clientsN(socket)-1)});
+		client.broadcast(message);
+	});
+	
+	
 });
+
 
 
 // var http = require('http');

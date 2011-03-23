@@ -10,7 +10,7 @@
 //   }
 	var socket = new io.Socket('192.168.3.108');		
 	var self = this,
-  		jobpins = { 
+		jobpins = { 
 		autor: "oliver",
 		map: Raphael('map', "100%", "100%"),
 		drawText: function(text) {
@@ -24,7 +24,9 @@
 		fm2: false,
 		fm3: false,
 		gemWs: {},
-		timeoutID : []	
+		timeoutID : [],
+		serverText: {},
+		sessionId: ""	
 		};
 		
 		//console.log(jobpins.drawText("Hello"));
@@ -33,7 +35,7 @@
 		console.log('connecting...');			
 		clearTimeout(jobpins.timeoutID[1]);
 		socket.connect();
-	};
+	}
 	
 	socket.on('disconnect',function() {
 		console.info('disconnect');
@@ -43,14 +45,19 @@
 	
 	socket.on('connect',function() {
 		console.info('connect');
-		console.markTimeline('connected'); //google chrome Monitor
+	//	console.markTimeline('connected'); //google chrome Monitor
 		jobpins.gemWs.attr({fill:"green"});
 	});
 	
-	
+	socket.on('message',function(message) {
+		var obj = $.parseJSON(message);
+		if (!jobpins.sessionId){jobpins.sessionId=obj.sessionId};
+		jobpins.serverText.node.textContent = "Clients: " + obj.clients;	
+		console.log(jobpins.sessionId);
+	});
 		
 	function init() {
-		SocketConnect()
+		SocketConnect();
     	drawMap();
 		drawText();
 		drawGem();
@@ -58,7 +65,7 @@
 		};
 
 	// function drawText(text) {
-	// 	return text;
+	//  return text;
 	// 	}; 
 
 	function getAttributeByIndex(obj, index) {
@@ -140,6 +147,8 @@
 		var maintext = jobpins.map.text(100,20, "Welcome").attr({"font-family": "Orbitron","font-size":24, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7}).toFront();
 
 		jobpins.subText = jobpins.map.text(110,40, "Austria").attr({"font-family": "Orbitron","font-size":14, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7});
+		
+		jobpins.serverText = jobpins.map.text(120,60, "").attr({"font-family": "Orbitron","font-size":14, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7}).toFront();
 			
 		function changeText() {
 			maintext.animate({fill:"#000",stroke:"#000"},2000,function() {
