@@ -1,5 +1,5 @@
 
-	var socket = new io.Socket('192.168.3.108');		
+	var socket = new io.Socket('192.168.3.108',{port:4000});		
 	var self = this,
 		jobpins = { 
 		autor: "oliver",
