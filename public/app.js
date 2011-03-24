@@ -1,13 +1,4 @@
 
-// Thanks to Mathias Pettersson for the initial inspiration: 
-//   http://github.com/mape
-// See also the PeepCode Screencast on Node.js
-//   https://peepcode.com/products/nodejs-i
-
-// function LiveStatsClient() {
-//   if (! (this instanceof arguments.callee)) {
-//     return new arguments.callee(arguments);
-//   }
 	var socket = new io.Socket('192.168.3.108');		
 	var self = this,
 		jobpins = { 
@@ -51,7 +42,7 @@
 	
 	socket.on('message',function(message) {
 		var obj = $.parseJSON(message);
-		if (!jobpins.sessionId){jobpins.sessionId=obj.sessionId};
+		if (!jobpins.sessionId){jobpins.sessionId=obj.sessionId;};
 		jobpins.serverText.node.textContent = "Clients: " + obj.clients;	
 		console.log(jobpins.sessionId);
 	});
@@ -116,8 +107,6 @@
 			};
 		});
 
-		
-		
    		 jobpins.bund.mouseout(function() {
 			
 			this.attr({fill: "#000"});
@@ -148,7 +137,7 @@
 
 		jobpins.subText = jobpins.map.text(110,40, "Austria").attr({"font-family": "Orbitron","font-size":14, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7});
 		
-		jobpins.serverText = jobpins.map.text(120,60, "").attr({"font-family": "Orbitron","font-size":14, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7}).toFront();
+		jobpins.serverText = jobpins.map.text(20,40, "").attr({"font-family": "Orbitron","font-size":6, stroke: "#00FF00", fill: "#0F0",'stroke-width': 0.5}).toFront();
 			
 		function changeText() {
 			maintext.animate({fill:"#000",stroke:"#000"},2000,function() {

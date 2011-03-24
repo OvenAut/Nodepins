@@ -1,5 +1,5 @@
 var express = require('express'),
-	io = require('socket.io');
+	io = require('./node_modules/socket.io');
 
 var app = express.createServer();
 var clients = [];
