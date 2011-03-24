@@ -1,5 +1,5 @@
 
-	var socket = new io.Socket('192.168.3.108',{port:4000});		
+	//var socket = new io.Socket('192.168.3.108',{port:4000});		
 	var self = this,
 		jobpins = { 
 		autor: "oliver",
@@ -22,33 +22,33 @@
 		
 		//console.log(jobpins.drawText("Hello"));
 		
-	function SocketConnect() {
-		console.log('connecting...');			
-		clearTimeout(jobpins.timeoutID[1]);
-		socket.connect();
-	}
-	
-	socket.on('disconnect',function() {
-		console.info('disconnect');
-		jobpins.timeoutID[1] = setTimeout(SocketConnect,5000);
-		jobpins.gemWs.attr({fill:"black"});
-	});
-	
-	socket.on('connect',function() {
-		console.info('connect');
-	//	console.markTimeline('connected'); //google chrome Monitor
-		jobpins.gemWs.attr({fill:"green"});
-	});
-	
-	socket.on('message',function(message) {
-		var obj = $.parseJSON(message);
-		if (!jobpins.sessionId){jobpins.sessionId=obj.sessionId;};
-		jobpins.serverText.node.textContent = "Clients: " + obj.clients;	
-		console.log(jobpins.sessionId);
-	});
+	// function SocketConnect() {
+	// 		console.log('connecting...');			
+	// 		clearTimeout(jobpins.timeoutID[1]);
+	// 		socket.connect();
+	// 	}
+	// 	
+	// 	socket.on('disconnect',function() {
+	// 		console.info('disconnect');
+	// 		jobpins.timeoutID[1] = setTimeout(SocketConnect,5000);
+	// 		jobpins.gemWs.attr({fill:"black"});
+	// 	});
+	// 	
+	// 	socket.on('connect',function() {
+	// 		console.info('connect');
+	// 	//	console.markTimeline('connected'); //google chrome Monitor
+	// 		jobpins.gemWs.attr({fill:"green"});
+	// 	});
+	// 	
+	// 	socket.on('message',function(message) {
+	// 		var obj = $.parseJSON(message);
+	// 		if (!jobpins.sessionId){jobpins.sessionId=obj.sessionId;};
+	// 		jobpins.serverText.node.textContent = "Clients: " + obj.clients;	
+	// 		console.log(jobpins.sessionId);
+	// 	});
 		
 	function init() {
-		SocketConnect();
+		// SocketConnect();
     	drawMap();
 		drawText();
 		drawGem();
@@ -210,10 +210,6 @@
 
 
 
-	socket.on("connect", function() {
-		
-		
-	});
 	
 
   // this.geoCoordsToMapCoords = function (latitude, longitude) {
