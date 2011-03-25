@@ -1,5 +1,30 @@
 
 	//var socket = new io.Socket('192.168.3.108',{port:4000});		
+function NodePinsClient() {
+	if (! (this instanceof arguments.callee)) {
+		return new arguments.callee(arguments);
+	}
+	
+	var self = this;
+	
+	this.init = function() {
+		self.setupBayeuxHandler();
+	};
+	
+	this.setupBayeuxHandler = function() {
+		$.getJSON("/config.json", function(config) {
+		self.client = new Faye.Client("http://" + window.location.hostname + ':' + config.port + '/faye', {
+			timeout: 120
+		});
+		self.client.subscribe('/stat',function(message) {
+			console.log(message);
+		});	
+		});
+	};
+	this.init();
+};
+
+
 	var self = this,
 		jobpins = { 
 		autor: "oliver",
@@ -299,9 +324,9 @@
 
 //};
 
-//var liveStatsClient;
+var nodePinsClient;
 $(function() {
-  //liveStatsClient = new LiveStatsClient();
+  nodePinsClient = new NodePinsClient();
 	init();
   $(window).resize(function() {
     viewDidResize();
