@@ -16,9 +16,18 @@ function NodePinsClient() {
 		self.client = new Faye.Client("http://" + window.location.hostname + ':' + config.port + '/faye', {
 			timeout: 120
 		});
+		
+		function showClient() {
+			//console.log(self.client._0);
+			self.drawID(self.client._0);
+		};
+		setTimeout(showClient,2000);
+		
 		self.client.subscribe('/stat',function(message) {
-			console.log(message);
-		});	
+			//console.log(message.ip);
+			
+		});
+		
 		});
 	};
 	this.init();
@@ -45,6 +54,10 @@ function NodePinsClient() {
 		sessionId: ""	
 		};
 		
+NodePinsClient.prototype.drawID = function(id) {
+	jobpins.map.text(80,336, id).attr({"font-family": "Orbitron","font-size":8, stroke: "#009900", fill: "#090",'stroke-width': 0.1}).toFront();
+	
+};
 		//console.log(jobpins.drawText("Hello"));
 		
 	// function SocketConnect() {
