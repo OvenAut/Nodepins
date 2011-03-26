@@ -7,9 +7,29 @@ function NodePinsClient() {
 	
 	var self = this;
 	
-	this.init = function() {
+	this.backRect = {};
+	this.subText = {};
+	this.timeoutID = [] ;
+	this.init = function() {		
 		self.setupBayeuxHandler();
+		self.drawMap();
+		self.drawText();
+		self.drawGem();
+	    self.viewDidResize();
+		
 	};
+	
+	this.getAttributeByIndex = function(obj, index) {
+		var i = 0;
+		for (var attr in obj){
+			if (index === i) {
+				return obj[attr];
+			}
+			i++;
+		}
+		return null;
+	};
+	
 	
 	this.setupBayeuxHandler = function() {
 		$.getJSON("/config.json", function(config) {
@@ -30,34 +50,141 @@ function NodePinsClient() {
 		
 		});
 	};
+	
+	this.viewDidResize = function() {
+    var width = $(window).width(),
+		height = $(window).height();
+     // windowHeight = $(window).height(),
+     // mapCanvasHeight = $(window).height(); //width * (1000 / 2000);
+
+    self.map.setSize(width , height * 0.99);
+    //$('#map').css({
+     // 'margin-top': (windowHeight - mapCanvasHeight) / 2.0
+    //});
+	}
+  	
+	
+	this.drawMap = function () {
+	   // self.map.canvas.setAttribute('viewBox', '0 0 567 369');
+		self.map = Raphael('map', "100%", "100%"),
+		self.map.canvas.setAttribute('viewBox', '0 0 640 340');
+		var attr = {
+		   stroke: '#00fe00',
+		 	fill: '#000',
+		   'stroke-width': 0.7
+		};
+		
+
+	   	for (var state in aut) {
+		
+	   		//var region = new Array;
+	   		var bund = self.map.path(aut[state].path).attr(attr);
+			var textstate = "sry no Data";
+			// bund.style.cursor = "pointer";
+   		 	bund.mouseover(function() {
+				this.attr({fill: "#050"});
+				self.subText.node.textContent = (self.getAttributeByIndex(aut, this.id)).name;
+				this[0].style.cursor = "pointer";
+		});
+
+		bund.click(function() {
+			// jobpins.clone = this.clone();
+			if(!self.backRect.node) {
+			self.drawBackRect(this);
+			this.animate({path: (self.getAttributeByIndex(aut, this.id)).big},500).toFront();
+			};
+		});
+
+   		 bund.mouseout(function() {
+			
+			this.attr({fill: "#000"});
+			self.subText.node.textContent = "Austria";
+			
+			// if (jobpins.fm3) {
+			//this.animate({path: (getAttributeByIndex(aut, this.id)).path},500);
+			// jobpins.fm3 = false;
+			// };
+		});
+		};
+	};
+
+	this.drawText = function() {
+
+		var maintext = self.map.text(100,20, "Welcome").attr({"font-family": "Orbitron","font-size":24, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7}).toFront();
+
+		self.subText = self.map.text(110,40, "Austria").attr({"font-family": "Orbitron","font-size":14, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7});
+
+		var serverText = self.map.text(20,40, "").attr({"font-family": "Orbitron","font-size":6, stroke: "#00FF00", fill: "#0F0",'stroke-width': 0.5}).toFront();
+
+		function changeText() {
+			maintext.animate({fill:"#000",stroke:"#000"},2000,function() {
+				maintext.node.textContent = "Jobpins";	
+				maintext.animate({fill:"#0d0",stroke:"#00fe00"},2000,function() {
+					self.map.ellipse(100,32,40,3).attr({fill:"#010"}).toBack();	
+				});
+			});
+			clearTimeout(self.timeoutID[0]);
+		};
+
+		self.timeoutID[0] = setTimeout(changeText,2000);
+
+		//changeText();
+
+
+
+  }
+	
+	this.drawBackRect = function(objThis) {
+		self.backRect = self.map.rect(0,0,640,340).attr({fill:"black","fill-opacity": 0.5}).toFront();
+		self.backRect.click(function() {
+			this.remove();
+			objThis.animate({path: (self.getAttributeByIndex(aut, objThis.id)).path},500);
+		});
+	};
+	
+	this.drawGem = function() {
+		
+		var attr = {
+		   stroke: '#00fe00',
+		 	fill: '#000',
+		   'stroke-width': 0.7
+		};
+		
+		self.gemWs = self.map.path(html5Svg.connectivity).attr(attr);
+	};
+	
+	
+	this.drawID = function(id) {
+		self.map.text(80,336, id).attr({"font-family": "Orbitron","font-size":8, stroke: "#050", fill: "#050",'stroke-width': 0.1}).toBack();
+	};
+	
+	
+	
 	this.init();
 };
 
 
-	var self = this,
-		jobpins = { 
-		autor: "oliver",
-		map: Raphael('map', "100%", "100%"),
-		drawText: function(text) {
-			return text;
-		},
-		subText: {},
-		backRect: {},
-		bund: {},
-		clone : {},
-		fm1: false,
-		fm2: false,
-		fm3: false,
-		gemWs: {},
-		timeoutID : [],
-		serverText: {},
-		sessionId: ""	
-		};
+	// var self = this,
+	// 	jobpins = { 
+	// 	autor: "oliver",
+	// 	map: Raphael('map', "100%", "100%"),
+	// 	drawText: function(text) {
+	// 		return text;
+	// 	},
+	// 	subText: {},
+	// 	backRect: {},
+	// 	bund: {},
+	// 	clone : {},
+	// 	fm1: false,
+	// 	fm2: false,
+	// 	fm3: false,
+	// 	gemWs: {},
+	// 	timeoutID : [],
+	// 	serverText: {},
+	// 	sessionId: ""	
+	// 	};
 		
-NodePinsClient.prototype.drawID = function(id) {
-	jobpins.map.text(80,336, id).attr({"font-family": "Orbitron","font-size":8, stroke: "#009900", fill: "#090",'stroke-width': 0.1}).toFront();
-	
-};
+
 		//console.log(jobpins.drawText("Hello"));
 		
 	// function SocketConnect() {
@@ -85,78 +212,14 @@ NodePinsClient.prototype.drawID = function(id) {
 	// 		console.log(jobpins.sessionId);
 	// 	});
 		
-	function init() {
-		// SocketConnect();
-    	drawMap();
-		drawText();
-		drawGem();
-    	viewDidResize();
-		};
 
 	// function drawText(text) {
 	//  return text;
 	// 	}; 
 
-	function getAttributeByIndex(obj, index) {
-		var i = 0;
-		for (var attr in obj){
-			if (index === i) {
-				return obj[attr];
-			}
-			i++;
-		}
-		return null;
-	};
 	
-	drawBackRect = function(objThis) {
-		jobpins.backRect = jobpins.map.rect(0,0,640,340).attr({fill:"black","fill-opacity": 0.5}).toFront();
-		jobpins.backRect.click(function() {
-			this.remove();
-			objThis.animate({path: (getAttributeByIndex(aut, objThis.id)).path},500);
-		});
-	};
 	
-	 drawMap = function () {
-	   // self.map.canvas.setAttribute('viewBox', '0 0 567 369');
-		jobpins.map.canvas.setAttribute('viewBox', '0 0 640 340');
-		var attr = {
-		   stroke: '#00fe00',
-		 	fill: '#000',
-		   'stroke-width': 0.7
-		};
 
-	   	for (var state in aut) {
-		
-	   		//var region = new Array;
-	   		jobpins.bund = jobpins.map.path(aut[state].path).attr(attr);
-			var textstate = "sry no Data";
-			// bund.style.cursor = "pointer";
-   		 	jobpins.bund.mouseover(function() {
-				this.attr({fill: "#050"});
-				jobpins.subText.node.textContent = (getAttributeByIndex(aut, this.id)).name;
-				this[0].style.cursor = "pointer";
-		});
-
-		jobpins.bund.click(function() {
-			// jobpins.clone = this.clone();
-			if(!jobpins.backRect.node) {
-			drawBackRect(this);
-			this.animate({path: (getAttributeByIndex(aut, this.id)).big},500).toFront();
-			};
-		});
-
-   		 jobpins.bund.mouseout(function() {
-			
-			this.attr({fill: "#000"});
-			jobpins.subText.node.textContent = "Austria";
-			
-			// if (jobpins.fm3) {
-			//this.animate({path: (getAttributeByIndex(aut, this.id)).path},500);
-			// jobpins.fm3 = false;
-			// };
-		});
-		};
-	};
 		
 
    		//console.log(bund);
@@ -169,43 +232,9 @@ NodePinsClient.prototype.drawID = function(id) {
 		//(function(st,state) {
 			
 		//})(aut[state], state);
-	function drawText() {
-	
-		var maintext = jobpins.map.text(100,20, "Welcome").attr({"font-family": "Orbitron","font-size":24, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7}).toFront();
-
-		jobpins.subText = jobpins.map.text(110,40, "Austria").attr({"font-family": "Orbitron","font-size":14, stroke: "#00ff00", fill: "#0d0",'stroke-width': 0.7});
-		
-		jobpins.serverText = jobpins.map.text(20,40, "").attr({"font-family": "Orbitron","font-size":6, stroke: "#00FF00", fill: "#0F0",'stroke-width': 0.5}).toFront();
-			
-		function changeText() {
-			maintext.animate({fill:"#000",stroke:"#000"},2000,function() {
-				maintext.node.textContent = "Jobpins";	
-				maintext.animate({fill:"#0d0",stroke:"#00fe00"},2000,function() {
-					jobpins.map.ellipse(100,32,40,3).attr({fill:"#010"}).toBack();	
-				});
-			});
-			clearTimeout(jobpins.timeoutID[0]);
-		};
-		
-		jobpins.timeoutID[0] = setTimeout(changeText,2000);
-		
-		//changeText();
-		
-		 
-
-  }
 
 
-	function drawGem() {
-		
-		var attr = {
-		   stroke: '#00fe00',
-		 	fill: '#000',
-		   'stroke-width': 0.7
-		};
-		
-		jobpins.gemWs = jobpins.map.path(html5Svg.connectivity).attr(attr);
-		
+
 		// var st = jobpins.map.set();
 		// 		st.push(
 		// 		    jobpins.map.ellipse(50, 100, 4, 1)
@@ -231,20 +260,9 @@ NodePinsClient.prototype.drawID = function(id) {
 		// 		// 		//console.log("map " + map.width);
 		// 		 	});
 				
-	};
-	
-	
-  	function viewDidResize() {
-    var width = $(window).width(),
-		height = $(window).height();
-     // windowHeight = $(window).height(),
-     // mapCanvasHeight = $(window).height(); //width * (1000 / 2000);
 
-    jobpins.map.setSize(width , height * 0.99);
-    //$('#map').css({
-     // 'margin-top': (windowHeight - mapCanvasHeight) / 2.0
-    //});
-  }
+	
+	
 
 
 
@@ -340,9 +358,9 @@ NodePinsClient.prototype.drawID = function(id) {
 var nodePinsClient;
 $(function() {
   nodePinsClient = new NodePinsClient();
-	init();
+	//init();
   $(window).resize(function() {
-    viewDidResize();
+    nodePinsClient.viewDidResize();
   });
 });
 
