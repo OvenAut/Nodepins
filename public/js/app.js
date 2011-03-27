@@ -37,6 +37,26 @@ function NodePinsClient() {
 			timeout: 120
 		});
 		
+		var clientAuth = {
+			outgoing: function(message, callback) {
+			//leav non-subscribe messages alone
+			if (message.channel !== '/meta/subscribe')
+			return callback(message);
+			
+			// Add ext field if it is not present
+			if (!message.ext) message.ext = {};	
+			
+			// Set the auth token
+			message.ext.authToken = 'rt6utrb';
+			
+			//Carry on and send the message to the server
+			
+			callback(message);
+			}
+		};
+		
+		self.client.addExtension(clientAuth);
+		
 		function showClient() {
 			//console.log(self.client._0);
 			self.drawID(self.client._0);
@@ -44,7 +64,7 @@ function NodePinsClient() {
 		setTimeout(showClient,2000);
 		
 		self.client.subscribe('/stat',function(message) {
-			//console.log(message.ip);
+			console.log(message.ip);
 			
 		});
 		
@@ -81,10 +101,12 @@ function NodePinsClient() {
 	   		var bund = self.map.path(aut[state].path).attr(attr);
 			var textstate = "sry no Data";
 			// bund.style.cursor = "pointer";
-   		 	bund.mouseover(function() {
-				this.attr({fill: "#050"});
-				self.subText.node.textContent = (self.getAttributeByIndex(aut, this.id)).name;
-				this[0].style.cursor = "pointer";
+		
+		bund.mouseover(function() {
+			this.attr({fill: "#050"});
+			self.subText.node.textContent = (self.getAttributeByIndex(aut, this.id)).name;
+			this[0].style.cursor = "pointer";
+			//self.getDataImage();
 		});
 
 		bund.click(function() {
@@ -100,10 +122,6 @@ function NodePinsClient() {
 			this.attr({fill: "#000"});
 			self.subText.node.textContent = "Austria";
 			
-			// if (jobpins.fm3) {
-			//this.animate({path: (getAttributeByIndex(aut, this.id)).path},500);
-			// jobpins.fm3 = false;
-			// };
 		});
 		};
 	};
