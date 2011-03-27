@@ -9,3 +9,7 @@ tmp/**/*
 
 ssl.crt
 ssl.key
+
+svg
+
+log/*.log
