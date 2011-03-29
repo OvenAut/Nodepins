@@ -10,6 +10,7 @@ function NodePinsClient() {
 	this.backRect = {};
 	this.subText = {};
 	this.timeoutID = [] ;
+	//this.workData = {};
 	this.init = function() {		
 		self.setupBayeuxHandler();
 		self.drawMap();
@@ -30,6 +31,18 @@ function NodePinsClient() {
 		return null;
 	};
 	
+	this.mergeBigData = function(dataTarget,dataSrc) {
+		for (key in dataTarget) {
+			for (key2 in dataTarget[key]) {
+				if (dataTarget[key][key2] == "")
+					{
+					dataTarget[key][key2] = dataSrc[key][key2];
+
+					}
+			}
+		}
+		//callback(dataTarget);
+	};
 	
 	this.setupBayeuxHandler = function() {
 		//var self = this;
@@ -43,7 +56,7 @@ function NodePinsClient() {
 		var clientAuth = {
 			outgoing: function(message, callback) {
 			//leav non-subscribe messages alone
-			console.log("outgoing: " + message.channel);
+			// console.log("outgoing: " + message.channel);
 			if (message.channel !== '/meta/subscribe')
 			return callback(message);
 			
@@ -59,8 +72,20 @@ function NodePinsClient() {
 			},
 
 			incoming: function(message, callback) {
-			console.log("incoming: " + message.channel);
-				
+			// console.log("incoming: " + message.channel);
+				if (message.extInt) {
+					if (message.extInt.bigData) {
+						var regex = /(^").*("(?!.))/m;
+						workData = message.extInt.bigData;
+ 						workData = JSON.parse(workData);
+						//workData = workData.replace(regex,"");
+						self.mergeBigData(aut,workData.aut);
+						// console.log(workData);
+						//var dataBig = JSON.parse(workData);
+						//dataBig = dataBig.replace(/(").+(")/,"");
+						//console.log(dataBig);
+					}
+				}
 			if (message.channel === '/meta/connect' && message.successful)
 				{
 				self.gemId.node.textContent = self.client._0;
@@ -82,8 +107,6 @@ function NodePinsClient() {
 		
 		self.client.subscribe('/stat',function(message) {
 
-			if (message.bigData)
-			console.log("Big Data incoming");
 			
 		});
 		
@@ -165,9 +188,6 @@ function NodePinsClient() {
 
 		self.timeoutID[0] = setTimeout(changeText,2000);
 
-		//changeText();
-
-
 
   }
 	
@@ -189,13 +209,6 @@ function NodePinsClient() {
 		
 		self.gemWs = self.map.path(html5Svg.connectivity).attr(attr);
 		
-	// };
-	// 
-	// 
-	// this.drawID = function() {
-	
-	
-	
 	
 		self.gemId = self.map.text(80,336, "").attr({"font-family": "Orbitron","font-size":8, stroke: "#050", fill: "#050",'stroke-width': 0.1}).toBack();
 	};
@@ -205,197 +218,6 @@ function NodePinsClient() {
 	this.init();
 };
 
-
-	// var self = this,
-	// 	jobpins = { 
-	// 	autor: "oliver",
-	// 	map: Raphael('map', "100%", "100%"),
-	// 	drawText: function(text) {
-	// 		return text;
-	// 	},
-	// 	subText: {},
-	// 	backRect: {},
-	// 	bund: {},
-	// 	clone : {},
-	// 	fm1: false,
-	// 	fm2: false,
-	// 	fm3: false,
-	// 	gemWs: {},
-	// 	timeoutID : [],
-	// 	serverText: {},
-	// 	sessionId: ""	
-	// 	};
-		
-
-		//console.log(jobpins.drawText("Hello"));
-		
-	// function SocketConnect() {
-	// 		console.log('connecting...');			
-	// 		clearTimeout(jobpins.timeoutID[1]);
-	// 		socket.connect();
-	// 	}
-	// 	
-	// 	socket.on('disconnect',function() {
-	// 		console.info('disconnect');
-	// 		jobpins.timeoutID[1] = setTimeout(SocketConnect,5000);
-	// 		jobpins.gemWs.attr({fill:"black"});
-	// 	});
-	// 	
-	// 	socket.on('connect',function() {
-	// 		console.info('connect');
-	// 	//	console.markTimeline('connected'); //google chrome Monitor
-	// 		jobpins.gemWs.attr({fill:"green"});
-	// 	});
-	// 	
-	// 	socket.on('message',function(message) {
-	// 		var obj = $.parseJSON(message);
-	// 		if (!jobpins.sessionId){jobpins.sessionId=obj.sessionId;};
-	// 		jobpins.serverText.node.textContent = "Clients: " + obj.clients;	
-	// 		console.log(jobpins.sessionId);
-	// 	});
-		
-
-	// function drawText(text) {
-	//  return text;
-	// 	}; 
-
-	
-	
-
-		
-
-   		//console.log(bund);
-
-// mouseover(function() {
-//    		 		this.animate({fill: "#f00"}, 1000, "bounce");
-//    			console.log("hello");
-//    		 	});
-   		//aut[state].color = Raphael.getColor();
-		//(function(st,state) {
-			
-		//})(aut[state], state);
-
-
-
-		// var st = jobpins.map.set();
-		// 		st.push(
-		// 		    jobpins.map.ellipse(50, 100, 4, 1)
-		// 		  //  map.ellipse(300, 200, 100, 10),
-		// 		  //  map.ellipse(500, 400, 100, 10)
-		// 		);
-		// 		jobpins.map.circle(50,100,4).attr({stroke: "green"});
-		// 		jobpins.map.circle(50,100,2).attr({fill: "black"});
-		// 		
-		// 		//map.circle(150,1000,40).attr({stroke: "green"});
-		// 		st.attr({fill: "0-#0f0-#030:20-#000","fill-opacity": 0.0}).toBack();
-		// 		var sty = jobpins.map.ellipse(50, 100, 4, 1).attr({fill: "0-#0f0-#030:20-#000","fill-opacity": 0.0}).toBack();
-		// 		
-		// 		 	$(document).mousemove(function(e) {
-		// 		// 		var blop = (2000/map.width);
-		// 		// 			//			height = $(window).height(),
-		// 		// 			// width = $("body").width(),
-		// 				st.animate({rotation:e.pageX},2000,"<").toBack();
-		// 				sty.animate({rotation:e.pageY},2000,"<").toBack();
-		// 		// 
-		// 		// 		//console.log("cals " + 2000/map.width);
-		// 		// 		//console.log("mouse " + width);
-		// 		// 		//console.log("map " + map.width);
-		// 		 	});
-				
-
-	
-	
-
-
-
-	
-
-  // this.geoCoordsToMapCoords = function (latitude, longitude) {
-  //   latitude = parseFloat(latitude);
-  //   longitude = parseFloat(longitude);
-  // 
-  //   var mapWidth = 567,
-  //     mapHeight = 369,
-  //     x, y, mapOffsetX, mapOffsetY;
-  // 
-  //   x = (mapWidth * (180 + longitude) / 360) % mapWidth;
-  // 
-  //   latitude = latitude * Math.PI / 180;
-  //   y = Math.log(Math.tan((latitude / 2) + (Math.PI / 4)));
-  //   y = (mapHeight / 2) - (mapWidth * y / (2 * Math.PI));
-  // 
-  //   mapOffsetX = mapWidth * 0.026;
-  //   mapOffsetY = mapHeight * 0.141;
-  // 
-  //   return {
-  //     x: (x - mapOffsetX) * 0.97,
-  //     y: (y + mapOffsetY + 15),
-  //     xRaw: x,
-  //     yRaw: y
-  //   };
-  // }
-  // 
-  // this.drawMarker = function (message) {
-  //   var latitude = message.latitude,
-  //     longitude = message.longitude,
-  //     text = message.title,
-  //     city = message.city,
-  //     x, y;
-  // 
-  //   var mapCoords = this.geoCoordsToMapCoords(latitude, longitude);
-  //   x = mapCoords.x;
-  //   y = mapCoords.y;
-  // 
-  //   var person = self.map.path(personPath);
-  //   person.scale(0.01, 0.01);
-  //   person.translate(-255, -255); // Reset location to 0,0
-  //   person.translate(x, y);
-  //   person.attr({
-  //       fill: '#ff9'
-  //     , stroke: 'transparent'
-  //   });
-  // 
-  //   var title = self.map.text(x, y + 11, text);
-  //   title.attr({
-  //       fill: 'white'
-  //     , "font-size": 10
-  //     , "font-family": "'Helvetica Neue', 'Helvetica', sans-serif"
-  //     , 'font-weight': 'bold'
-  //   });
-
-  //   var subtitle = self.map.text(x, y + 21, city);
-  //   subtitle.attr({
-  //       fill: '#999'
-  //     , "font-size": 7
-  //     , "font-family": "'Helvetica Neue', 'Helvetica', sans-serif"
-  //   });
-  // 
-  //   var hoverFunc = function () {
-  //     person.attr({
-  //       fill: 'white'
-  //     });
-  //     $(title.node).fadeIn('fast');
-  //     $(subtitle.node).fadeIn('fast');
-  //   };
-  //   var hideFunc = function () {
-  //     person.attr({
-  //       fill: '#ff9'
-  //     });
-  //     $(title.node).fadeOut('slow');
-  //     $(subtitle.node).fadeOut('slow');
-  //   };
-  //   $(person.node).hover(hoverFunc, hideFunc);
-  // 
-  //   person.animate({
-  //     scale: '0.02, 0.02'
-  //   }, 2000, 'elastic', function () {
-  //     $(title.node).fadeOut(5000);
-  //     $(subtitle.node).fadeOut(5000);
-  //   });
-  // }
-
-
-//};
 
 var nodePinsClient;
 $(function() {
