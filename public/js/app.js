@@ -32,14 +32,18 @@ function NodePinsClient() {
 	
 	
 	this.setupBayeuxHandler = function() {
+		//var self = this;
 		$.getJSON("/config.json", function(config) {
 		self.client = new Faye.Client("http://" + window.location.hostname + ':' + config.port + '/faye', {
 			timeout: 120
 		});
 		
+	
+		
 		var clientAuth = {
 			outgoing: function(message, callback) {
 			//leav non-subscribe messages alone
+			console.log("outgoing: " + message.channel);
 			if (message.channel !== '/meta/subscribe')
 			return callback(message);
 			
@@ -52,19 +56,34 @@ function NodePinsClient() {
 			//Carry on and send the message to the server
 			
 			callback(message);
+			},
+
+			incoming: function(message, callback) {
+			console.log("incoming: " + message.channel);
+				
+			if (message.channel === '/meta/connect' && message.successful)
+				{
+				self.gemId.node.textContent = self.client._0;
+				self.gemWs.attr({fill: "#0f0", stroke :"#0f0"});
+				self.gemWs.animate({fill:"#000", stroke: "#000"},45000);
+				}				
+			callback(message);	
 			}
+		
 		};
 		
 		self.client.addExtension(clientAuth);
 		
-		function showClient() {
-			//console.log(self.client._0);
-			self.drawID(self.client._0);
-		};
-		setTimeout(showClient,2000);
+		// function showClient() {
+		// 	//console.log(self.client._0);
+		// //	self.drawID(self.client._0);
+		// };
+		// setTimeout(showClient,2000);
 		
 		self.client.subscribe('/stat',function(message) {
-			console.log(message.ip);
+
+			if (message.bigData)
+			console.log("Big Data incoming");
 			
 		});
 		
@@ -86,7 +105,7 @@ function NodePinsClient() {
 	
 	this.drawMap = function () {
 	   // self.map.canvas.setAttribute('viewBox', '0 0 567 369');
-		self.map = Raphael('map', "100%", "100%"),
+		self.map = Raphael('map', "100%", "100%");
 		self.map.canvas.setAttribute('viewBox', '0 0 640 340');
 		var attr = {
 		   stroke: '#00fe00',
@@ -169,11 +188,16 @@ function NodePinsClient() {
 		};
 		
 		self.gemWs = self.map.path(html5Svg.connectivity).attr(attr);
-	};
+		
+	// };
+	// 
+	// 
+	// this.drawID = function() {
 	
 	
-	this.drawID = function(id) {
-		self.map.text(80,336, id).attr({"font-family": "Orbitron","font-size":8, stroke: "#050", fill: "#050",'stroke-width': 0.1}).toBack();
+	
+	
+		self.gemId = self.map.text(80,336, "").attr({"font-family": "Orbitron","font-size":8, stroke: "#050", fill: "#050",'stroke-width': 0.1}).toBack();
 	};
 	
 	
