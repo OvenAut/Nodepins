@@ -65,7 +65,8 @@ function NodePinsClient() {
 			
 			// Set the auth token
 			message.ext.authToken = 'rt6utrb';
-			
+			if (aut.w.big === "w")
+				massage.dataBigOut = true;
 			//Carry on and send the message to the server
 			
 			callback(message);
@@ -73,25 +74,36 @@ function NodePinsClient() {
 
 			incoming: function(message, callback) {
 			// console.log("incoming: " + message.channel);
+			self.drawGemWs();
+			if (message.channel === ('/meta/subscribe' || '/meta/handshake'))
+			return callback(message);
+			
+			if (message.channel === '/meta/connect') {
+				if (message.successful)				
+					self.drawGemWs(self.client._0);
+				
 				if (message.extInt) {
 					if (message.extInt.bigData) {
-						var regex = /(^").*("(?!.))/m;
-						workData = message.extInt.bigData;
- 						workData = JSON.parse(workData);
+						//var regex = /(^").*("(?!.))/m;
+						//workData = ;
+ 						workData = JSON.parse(message.extInt.bigData);
 						//workData = workData.replace(regex,"");
 						self.mergeBigData(aut,workData.aut);
 						// console.log(workData);
 						//var dataBig = JSON.parse(workData);
 						//dataBig = dataBig.replace(/(").+(")/,"");
 						//console.log(dataBig);
+					return callback(message);
 					}
 				}
-			if (message.channel === '/meta/connect' && message.successful)
-				{
-				self.gemId.node.textContent = self.client._0;
-				self.gemWs.attr({fill: "#0f0", stroke :"#0f0"});
-				self.gemWs.animate({fill:"#000", stroke: "#000"},45000);
-				}				
+			return callback(message);
+			}
+			
+			if (message.channel === '/map') {
+				console.log(message.extInt);
+			return callback(message);
+			};
+								
 			callback(message);	
 			}
 		
@@ -106,11 +118,18 @@ function NodePinsClient() {
 		// setTimeout(showClient,2000);
 		
 		self.client.subscribe('/stat',function(message) {
-
-			
-		});
+		// 
+		// 			
+	 	});
 		
 		});
+	};
+	
+	this.drawGemWs = function(clientId) {
+		if (clientId && (self.gemId.node.textContent !== clientId)) 
+		self.gemId.node.textContent = clientId;
+		self.gemWs.attr({fill: "#0f0", stroke :"#0f0"});
+		self.gemWs.animate({fill:"#000", stroke: "#000"},45000);	
 	};
 	
 	this.viewDidResize = function() {
@@ -153,9 +172,14 @@ function NodePinsClient() {
 
 		bund.click(function() {
 			// jobpins.clone = this.clone();
+			var that = this;
 			if(!self.backRect.node) {
 			self.drawBackRect(this);
-			this.animate({path: (self.getAttributeByIndex(aut, this.id)).big},500).toFront();
+			var mapAttr = self.getAttributeByIndex(aut, this.id)
+			this.animate({path: mapAttr.big},500,function() {
+				// var tmp = aut[that.id]
+				self.client.publish('/map', {key: mapAttr.name});
+			}).toFront();
 			};
 		});
 
@@ -195,7 +219,9 @@ function NodePinsClient() {
 		self.backRect = self.map.rect(0,0,640,340).attr({fill:"black","fill-opacity": 0.5}).toFront();
 		self.backRect.click(function() {
 			this.remove();
-			objThis.animate({path: (self.getAttributeByIndex(aut, objThis.id)).path},500);
+			objThis.animate({path: (self.getAttributeByIndex(aut, objThis.id)).path},500,function() {
+				this.attr({fill: "#000"});
+			});
 		});
 	};
 	
